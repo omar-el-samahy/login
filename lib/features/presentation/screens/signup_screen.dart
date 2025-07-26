@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../widgets/custom_text_field.dart';
 import 'confirm_dialogue.dart';
 
+
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
@@ -15,8 +16,47 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  void _showConfirmation() {
-    showDialog(context: context, builder: (context) => const ConfirmDialog());
+  bool _loading = false;
+
+  Future<void> _signUp() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    final name = _nameController.text.trim();
+
+    if (email.isEmpty || password.isEmpty || name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please fill all fields")),
+      );
+      return;
+    }
+
+    setState(() => _loading = true);
+
+    try {
+      final supabase = Supabase.instance.client;
+
+      final response = await supabase.auth.signUp(
+        email: email,
+        password: password,
+        data: {'full_name': name},
+      );
+
+      if (response.user != null) {
+        // ✅ Show confirmation dialog
+        if (context.mounted) {
+          showDialog(
+            context: context,
+            builder: (_) => const ConfirmDialog(),
+          );
+        }
+      }
+    } on AuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Signup failed: ${e.message}")),
+      );
+    } finally {
+      setState(() => _loading = false);
+    }
   }
 
   @override
@@ -46,7 +86,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
             const SizedBox(height: 4),
             const Text(
               "CREATE AN ACCOUNT TO MAKE SDFDSF",
-              style: TextStyle(fontSize: 14, color: Colors.white70),
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white70,
+              ),
             ),
             const SizedBox(height: 40),
 
@@ -61,15 +104,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ),
             const SizedBox(height: 30),
 
-            // Indicator Dots
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [_buildDot(true), _buildDot(false), _buildDot(false)],
+              children: [
+                _buildDot(true),
+                _buildDot(false),
+                _buildDot(false),
+              ],
             ),
             const SizedBox(height: 30),
 
-            // NEXT Button
-            SizedBox(
+            _loading
+                ? const Center(child: CircularProgressIndicator())
+                : SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
@@ -79,14 +126,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-                onPressed: _showConfirmation,
+                onPressed: _signUp,
                 child: const Text(
                   "NEXT",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style:
+                  TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
+
             const SizedBox(height: 16),
+
             Center(
               child: GestureDetector(
                 onTap: () => Navigator.pop(context),

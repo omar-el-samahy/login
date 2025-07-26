@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
+import 'core/constants/supabase_cofig.dart';
 import 'core/theme/app_theme.dart';
 import 'features/presentation/screens/landing_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: SupabaseConfig.supabaseUrl,
+    anonKey: SupabaseConfig.supabaseAnonKey,
+  );
+
   runApp(const LoginUI());
 }
 
