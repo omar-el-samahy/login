@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../dashboard/presentation/screens/home_screen.dart';
 import '../widgets/custom_text_field.dart';
 
 
@@ -28,6 +29,10 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     setState(() => _loading = true);
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const HomeScreen()),
+    );
 
     try {
       final supabase = Supabase.instance.client;

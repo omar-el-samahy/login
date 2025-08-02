@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'core/constants/supabase_cofig.dart';
 import 'core/theme/app_theme.dart';
-import 'features/presentation/screens/landing_screen.dart';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'features/auth/presentation/screens/landing_screen.dart';
 
 
 void main() async {
